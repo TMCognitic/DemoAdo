@@ -5,17 +5,17 @@ using System.Data.Common;
 
 namespace Tools.Database
 {
-    public class Connection
+    public class Connection : IConnection
     {
         private readonly string _connectionString;
         private DbProviderFactory _factory;
 
-        public Connection(string connectionString, DbProviderFactory factory)
+        public Connection(IConnectionInfo connectionInfo, DbProviderFactory factory)
         {
-            _connectionString = connectionString;
+            _connectionString = connectionInfo.ConnectionString;
             _factory = factory;
 
-            using(DbConnection sqlConnection = CreateConnection())
+            using (DbConnection sqlConnection = CreateConnection())
             {
                 sqlConnection.Open();
             }
@@ -31,7 +31,7 @@ namespace Tools.Database
                     return sqlCommand.ExecuteNonQuery();
                 }
             }
-        }        
+        }
 
         public object ExecuteScalar(Command command)
         {
@@ -58,7 +58,7 @@ namespace Tools.Database
                     sqlConnection.Open();
                     using (IDataReader dataReader = sqlCommand.ExecuteReader())
                     {
-                        while(dataReader.Read())
+                        while (dataReader.Read())
                         {
                             yield return selector(dataReader);
                         }
@@ -73,7 +73,7 @@ namespace Tools.Database
             {
                 using (DbCommand sqlCommand = CreateCommand(command, sqlConnection))
                 {
-                    using(DbDataAdapter sqlDataAdapter = _factory.CreateDataAdapter())
+                    using (DbDataAdapter sqlDataAdapter = _factory.CreateDataAdapter())
                     {
                         sqlDataAdapter.SelectCommand = sqlCommand;
                         DataTable dataTable = new DataTable();
@@ -105,11 +105,11 @@ namespace Tools.Database
         {
             DbCommand sqlCommand = sqlConnection.CreateCommand();
             sqlCommand.CommandText = command.Query;
-            
+
             if (command.IsStoredProcedure)
                 sqlCommand.CommandType = CommandType.StoredProcedure;
 
-            foreach(KeyValuePair<string, Parameter> kvp in command.Parameters)
+            foreach (KeyValuePair<string, Parameter> kvp in command.Parameters)
             {
                 DbParameter sqlParameter = _factory.CreateParameter();
                 sqlParameter.ParameterName = kvp.Key;
