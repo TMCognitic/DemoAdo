@@ -1,0 +1,5 @@
+﻿CREATE USER [DemoAdo]
+	For LOGIN [DemoAdo]
+GO
+
+GRANT CONNECT TO [DemoAdo]

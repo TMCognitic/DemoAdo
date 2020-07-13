@@ -1,0 +1,1 @@
+﻿CREATE LOGIN [DemoAdo] WITH PASSWORD = 'DemoAdo'
